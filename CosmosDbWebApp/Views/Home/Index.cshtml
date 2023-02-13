@@ -1,0 +1,135 @@
+﻿<h1>Employee Details</h1>
+<button class="btn btn-primary" onclick="showEmployeeForm(0)">Add Employee</button>
+<input type="hidden" id="hdnId" />
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Edit/Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var emp in Model)
+        {
+            <tr>
+                <td>@emp.Id</td>
+                <td>@emp.Name</td>
+                <td>
+                    <button style="margin-right:5px;" class="btn btn-primary" onclick="showEmployeeForm('@emp.Id')">Edit </button><button class="btn btn-danger" onclick="deleteEmployee('@emp.Id')">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div class="container">
+    @*<h2>Modal Example</h2>*@
+    <!-- Trigger the modal with a button -->
+    @*<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>*@
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title"><span class="addEditText">Add</span> Employee</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="alert alert-danger" id="alertBox">
+                            <strong>All fields are required.</strong>
+                        </div>
+                        <form>
+                            <div class="form-group">
+                                <label for="empName">Name*:</label>
+                                <input type="text" class="form-control" id="empName" placeholder="Enter Name" name="empName">
+                            </div>
+                            <button type="button" class="btn btn-success" onclick="addEmployee()"><span class="addEditText">Add</span> Employee</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script>
+    function showEmployeeForm(id) {
+        if(id!="0"){
+            $('#hdnId').val(id);
+            $('.addEditText').text("Update")
+            $.ajax({
+                type: "GET",
+                url: "/Home/GetEmployeeById",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: {id},
+                success: function (data) {
+                    var result = JSON.parse(data);
+                    console.log(data);
+                    $('#empName').val(result["name"]);
+                }
+            });
+        }
+        else{
+            $('#hdnId').val(0);
+            $('.addEditText').text("Add")
+        }
+        $("#myModal").modal('show');
+    }
+    $(document).ready(function () {
+        $('#alertBox').hide();
+        $("#myModal").on('hide.bs.modal', function () {
+            $('#alertBox').hide();
+            resetFields();
+        });
+    });
+    function addEmployee() {
+        var id=$('#hdnId').val();
+        var name=$('#empName').val();
+        if (name==='') {
+            $('#alertBox').show();
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                url: "/Home/AddUpdateEmployee",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify({ name,id}),
+                success: function (data) {
+                    resetFields();
+                    alert(data);
+                    var url = window.location.href;
+                    url = url.replace(url.substring(url.indexOf("?")), "");
+                    window.location.href = url;
+                }
+            });
+        }
+    }
+    function deleteEmployee(id){
+        var action=confirm("Are you sure to delete this record?")
+        if(action){
+            $.ajax({
+                type: "POST",
+                url: "/Home/DeleteEmployeeById",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify({id}),
+                success: function (data) {
+                    alert(data);
+                    location.reload();
+                }
+            });
+        }
+    }
+    function resetFields(){
+        $('#empName').val("");
+        $('#empGender').val("");
+        $('#empLocation').val("");
+    }
+</script>
