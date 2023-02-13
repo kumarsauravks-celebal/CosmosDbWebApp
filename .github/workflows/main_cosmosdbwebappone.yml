@@ -53,5 +53,5 @@ jobs:
         with:
           app-name: 'CosmosDbWebAppOne'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E91B04B465404828AFE3A7D0BE173B0E }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_78F9F7DE568343E19CF7A72BA2497C92 }}
           package: .
